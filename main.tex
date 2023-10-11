@@ -1,0 +1,62 @@
+\documentclass[twocolumn]{article}
+
+\usepackage{amsmath}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage{titling}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{lmodern}
+% \usepackage{placeins}
+% \usepackage{hhline}
+\usepackage{ctex}
+% \usepackage{biblatex}
+\usepackage{hyperref}
+
+\newcolumntype{A}{>{\centering\arraybackslash}X}
+\newcolumntype{B}{>{\centering\arraybackslash\bfseries}X}
+\definecolor{mydarkblue}{rgb}{0,0.08,0.45}
+\hypersetup{%
+  pdftitle={“大雾实验工具”的开发},
+  pdfauthor={张学涵},
+  pdfsubject={《程序设计进阶与实践》大作业报告},
+  pdfkeywords={大物实验, 程序设计, 团队协作, Python},
+  pdfborder=0 0 0,
+  pdfpagemode=UseNone,
+  colorlinks=true,
+  linkcolor=mydarkblue,
+  citecolor=mydarkblue,
+  filecolor=mydarkblue,
+  urlcolor=mydarkblue,
+}
+\title{%
+“大雾实验工具”的开发\\
+\large《程序设计进阶与实践》大作业报告}
+\setlength{\droptitle}{-1.2in}
+\posttitle{\par\end{center}\vspace{-0.2in}}
+\preauthor{}
+\postauthor{}
+\author{}
+\predate{}
+\postdate{}
+\date{}
+% \addbibresource{main.bib}
+
+\begin{document}
+
+\twocolumn[\maketitle
+\input{content/meta.tex}
+\vskip\baselineskip]
+\input{content/analysis.tex}
+\input{content/design.tex}
+\input{content/testing.tex}
+\input{content/trouble.tex}
+\input{content/collaboration.tex}
+\input{content/conclusion.tex}
+\input{content/reference.tex}
+% \printbibliography[title=参考文献]
+% \input{content/appendix.tex}
+
+\end{document}

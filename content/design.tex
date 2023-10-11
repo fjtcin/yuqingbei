@@ -1,0 +1,173 @@
+\section{项目功能设计}
+
+\subsection{总体功能说明}
+
+\emph{大雾实验工具}是本组成员 2022 春季学期\textit{程序设计进阶与实践}的大作业项目。
+本工具通过腾讯云服务器搭建于网页平台，支持任何设备自由访问。
+传入实验数据后，本工具立刻完成绘制图像、计算不确定度、生成计算公式等一系列操作，
+并将最终结果整理成一份 Word 文档，下载后即可直接使用。
+本实验工具支持一级大物的 25 个实验，如图 \ref{fig:main} 所示，这大大提升了学生们撰写实验报告的效率。
+由于本工具只是将传入的实验数据进行自动分析，故其不会造成抄袭、造假等学术不端问题。
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[height=0.95\textheight]{figure/main.png}
+  \caption{大雾实验工具网站主界面}
+  \label{fig:main}
+\end{figure}
+
+\subsection{具体功能点说明}
+
+使用本工具时，用户只需输入他们做实验时测量到的原始数据，
+而无需任何额外的计算处理，用户所要做的只有按照规定的格式上传 Excel 文档。
+本工具支持 \verb|xlsx|, \verb|csv| 等各种格式的数据表格。
+具体而言，每个实验都会有一张示例数据表供用户参考，如图 \ref{fig:interface} 的界面所示。
+用户也可以直接下载示例数据，并直接在它的基础上进行修改。
+因此，本工具没有任何学习成本，是一款即点即用、免安装的简单轻应用。
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.67\columnwidth]{figure/interface.png}
+  \caption{“拉伸法测钢丝杨氏模量”的工具界面}
+  \label{fig:interface}
+\end{figure}
+
+另外，本工具贴心地提供了不确定度表格与通用的计算工具，并且每个实验都附有可在线浏览的实验指导。
+
+\subsubsection*{绘制图像}
+
+本工具根据输入的数据以及实验原理，自动生成美观的实验图像，
+支持平滑去噪、数据拟合、双 y 图等多种图像生成需求，如图 \ref{fig:draw} 所示。
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.67\columnwidth]{figure/draw.jpg}
+  \caption{平滑连接的光电效应伏安特性曲线}
+  \label{fig:draw}
+\end{figure}
+
+\subsubsection*{计算不确定度与生成计算公式}
+
+本工具在生成的 Word 文档中渲染了各种公式，如图 \ref{fig:calc} 所示。
+用户可以直观看到不确定度每一步的计算过程，并在自己的报告中直接使用这些算式与结果。
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.67\columnwidth]{figure/calc.png}
+  \caption{不确定度计算的详细过程}
+  \label{fig:calc}
+\end{figure}
+
+在 Word 文档中除了有已经渲染好的公式外，
+我们还提供了它们的 \LaTeX{} 源码。
+这极大方便了用 \LaTeX{}, Markdown 等排版实验报告的用户，他们无需手动敲入每一个算式了。
+
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=0.67\columnwidth]{figure/latex.png}
+%   \caption{不确定度算式的 \LaTeX{} 源码}
+%   \label{fig:latex}
+% \end{figure}
+
+\subsection{功能点设计细节}
+
+本工具后端使用 Python 编写，使用的包与模块如表 \ref{tab:pkg} 所示。
+前端由 HTML 编写，并使用了 \verb|Flask| Web 应用框架。
+
+\begin{table}[htbp]
+  \caption{本工具使用的全部 Python 包与模块}
+  \label{tab:pkg}
+  \vskip 0.1in
+  \centering\small
+  \begin{tabular}{lc}
+  \toprule
+  Python 包或模块 & 用途 \\
+  \midrule
+  \verb|chardet| & 检测用户上传的数据表格的编码 \\
+  \verb|collections| & 通过 \verb|namedtuple| 使代码更清晰 \\
+  \verb|Flask| & Web 应用框架 \\
+  \verb|latex2mathml| & \LaTeX{} 代码转换为 \verb|MathML| 代码 \\
+  \verb|lxml| & \verb|MathML| 代码转 \verb|Office MathML| \\
+  \verb|math|, \verb|numpy| & 不确定度数字运算 \\
+  \verb|Matplotlib| & 绘制物理图像 \\
+  \verb|os|, \verb|random|, \verb|shutil| & 后台文件操作与管理 \\
+  \verb|pandas| & 数据表格处理 \\
+  \verb|python-docx| & 生成 Word 文档 \\
+  \verb|SciPy| & 数据拟合 \\
+  \verb|SymPy| & 不确定度符号运算 \\
+  \verb|time|, \verb|threading| & 定时删除生成的 Word 文档 \\
+  \verb|traceback| & 打印运行错误以便调试 \\
+  \bottomrule
+  \end{tabular}
+  \vskip -0.1in
+\end{table}
+
+\subsubsection{图像绘制}
+
+图像由 \verb|Matplotlib| 绘制。我们的规范如下：
+\begin{itemize}
+  \item 面向绘图对象作图：\verb|fig, ax = matplotlib|\\\verb|.pyplot.subplots()|
+  \item 设置副刻度为主刻度的一半，主刻度为默认：\verb|ax.xaxis.set_minor_locator(matplotlib|\\\verb|.ticker.AutoMinorLocator(2))|
+  \item 刻度朝内：\verb|matplotlib.rcParams["xtick|\\\verb|.direction"] = matplotlib.rcParams|\\\verb|["ytick.direction"] = "in"|
+  \item 若一张图有且只有一组点线，则点使用红色（\verb|color="r"|），线使用蓝色（\verb|color="b"|），且线覆盖在点的上面；若一张图有多组点线，则同一组点线的颜色应当相同，并依次使用蓝(\verb|b|)、红(\verb|r|)、绿(\verb|g|)、紫(\verb|m|)、橙(\verb|orange|)、青(\verb|c|)。
+  \item 点的类型使用实心圆（\verb|"o"|），若一张图有多组点线，则依次使用实心圆(\verb|o|)、正方形(\verb|s|)、上三角(\verb|^|)、菱形(\verb|D|)、下三角(\verb|v|)、星号(\verb|*|)。
+  \item 线条粗细使用 \verb|linewidth=1.5|, 点的大小使用 \verb|markersize=3|, 可视数据量、数据组数适当调整，但应保持统一性。
+  \item 绘制双 y 轴图使用 \verb|matplotlib.axes.Axes| 对象的 \verb|twinx()| 方法。
+  \item 只有一组点线的图，一般不显示图例。
+  \item 图像字体：\verb|SourceHanSansSC-Regular.otf|
+  \item 轴标签和标题中的物理量名称与单位应使用 \LaTeX{}。
+\end{itemize}
+
+\subsubsection{数据处理}
+
+无论使绘制图像时的线性拟合，还是计算不确定度的大小，都绕不开数据处理。
+我们利用 \verb|pandas|, \verb|SciPy|, \verb|SymPy| 等包自主编写了 \verb|calc.py| 应用程序接口，
+它提供以下函数：
+\begin{description}
+  \item[科学计数法输出] \verb|numlatex: (num: float,|\\\verb|prec: int = 5) -> str|\\
+  \fbox{返回一个数的科学计数法形式的 \LaTeX{} 代码}\\
+  \verb|num|: 要转成科学计数法的数字\\
+  \verb|prec|: 有效数字位数（默认值：5）
+  \item[不确定度计算] \verb|analyse: (data: pandas.DataFrame,|\\\verb|delta_b1: float = 0., delta_b2: float|\\\verb|= 0., symbol: str = "x", unit: str = "",|\\\verb|confidence_C: float = 3., confidence_P:|\\\verb|float = 0.95) -> AnalyseData|\\
+  \fbox{计算一组数据的平均值、标准差、不确定度}
+  \verb|data|: 要处理的一组实验数据\\
+  \verb|delta_b1|: 仪器最大允差 \(\Delta_\text{仪}\)（默认值：0）\\
+  \verb|delta_b2|: 估读最大允差 \(\Delta_\text{估}\)（默认值：0）\\
+  \verb|symbol|: 数据的物理符号（默认值：\verb|"x"|）\\
+  \verb|unit|: 数据的单位（默认值：\verb|""|）\\
+  \verb|confidence_C|: 置信系数 \(C\)（默认值：3）\\
+  \verb|confidence_P|: 置信概率 \(P\)（默认值：0.95）\\
+  \verb|AnalyseData|: 数据计算结果的集合
+  \item[最小二乘法线性回归] \verb|analyse_lsm: (data_X:|\\\verb|pandas.DataFrame, data_Y: pandas|\\\verb|.DataFrame, symbol_X: str = "X",|\\\verb|symbol_Y: str = "Y", unit_m: str = "",|\\\verb|unit_b: str = "") -> AnalyseLsmData|\\
+  \fbox{将一组数据用最小二乘法拟合成一条直线}\\
+  \verb|data_X|: x轴数据（自变量数据）\\
+  \verb|data_Y|: y轴数据（因变量数据）\\
+  \verb|symbol_X|: 自变量物理符号（默认值：\verb|"X"|）\\
+  \verb|symbol_Y|: 因变量物理符号（默认值：\verb|"Y"|）\\
+  \verb|unit_m|: 斜率的单位（默认值：\verb|""|）\\
+  \verb|unit_b|: 截距的单位（默认值：\verb|""|）\\
+  \verb|AnalyseLsmData|: 直线拟合结果的集合
+  \item[不确定度合成] \verb|analyse_com: (exp: str, varr:|\\\verb|tuple = (), constt: tuple = (), unit:|\\\verb|str = "", confidence_P: float = 0.95)|\\\verb|-> AnalyseComData|\\
+  \fbox{根据表达式计算物理量的值和不确定度}\\
+  \verb|exp|: 物理量计算表达式（字符串），为一个物理量=一些物理量（或常量）之积与之商的形式，如 \verb|E=4*pi**2*l/T**2| 代表 \(E=\frac{4\pi^2l}{T^2}\)\\
+  \verb|varr|: 物理量（元组），元组的每个元素均为元组，该子元组的第 1 个元素为物理量名，第 2 个元素为物理量值，第 3 个元素为其不确定度（默认值：\verb|()|）\\
+  \verb|constt|: 常量（元组），元组的每个元素均为元组，该子元组的第 1 个元素为常量名，第 2 个元素为常量值（默认值：\verb|()|）\\
+  \verb|unit|: 要计算的物理量的单位（默认值：\verb|""|）\\
+  \verb|confidence_P|: 置信概率 \(P\)（默认值：0.95）\\
+  \verb|AnalyseComData|: 不确定度合成结果的集合
+\end{description}
+
+\subsubsection{文档生成}
+
+Word 文档由 \verb|python-docx| 生成。我们的规范如下：
+\begin{itemize}
+  \item 字体使用微软雅黑：\verb|document.styles|\\\verb|['Normal'].font.name = "微软雅黑"|
+  \item 文档第一行是实验名称：\\\verb|document.add_paragraph(name())|\\随后注明：\\“【Latex 代码在下面，请向下翻阅】”
+  \item 内容跨度较大的段落之间应当用一个空行。
+  \item 文档中插入的数据一般保留 4 或 5 位有效数字：\verb|"%.5g"%x|, 线性拟合的相关系数 \(r\) 保留 8 位有效数字。
+  \item 若某张图片正好在第 2 页开头，而第 1 页尾部有很多空白区域，为避免误解，应在第1页的最后一个段落之后注明“【本文档不只有一页，请向下翻阅】”。
+  \item 插入表格使用 \verb|docx.document.Document| 对象的 \verb|add_table()| 方法。
+\end{itemize}
+
+鉴于不确定度的计算方法是固定的、算法化的，我们利用 \verb|lxml| 等包自主编写了 \verb|insert.py| 应用程序接口，
+这样只需调用几个函数，就可以在 Word 文档中完成数学算式的渲染与添加。具体可见公式插入 API 的说明文档，这里不再赘述。
